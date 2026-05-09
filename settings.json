@@ -1,0 +1,12 @@
+{
+  "tariff": 50.0,
+  "currency": "PKR",
+  "co2_factor": 0.4,
+  "alert_threshold": 1000.0,
+  "timezone": "Asia/Karachi",
+  "power_unit": "W",
+  "rated_kw": 7.74,
+  "inverter_kw": 12.0,
+  "latitude": 33.6007,
+  "longitude": 73.0679
+}

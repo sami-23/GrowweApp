@@ -1,0 +1,83 @@
+================================================================================
+  SOLAR REPORTS — FEATURE TODO LIST
+================================================================================
+
+STATUS KEY:  [x] Done   [-] In Progress   [ ] Pending   [~] Removed
+
+--------------------------------------------------------------------------------
+SECTION: LIVE MONITORING
+--------------------------------------------------------------------------------
+[x] Live dashboard tile — real-time PV, grid, load, battery (auto-refresh 30s)
+[x] Push alerts — browser notification when grid import exceeds configurable threshold
+[x] Live power flow diagram — animated SVG showing energy flow between solar,
+    battery, home, and grid; Pulse/Solid/Dash animation styles with directional arrows
+[x] Color-coded live tiles — dynamic HSL gradient (blue→amber→red for load,
+    blue→amber→green for generation); updates each refresh
+[x] Inverter Load tile — percentage highlighted on top, kW value + max capacity below
+[x] Live Solar Power tile — percentage + kW value displayed; color-coded
+[x] Est. Generation Potential — percentage vs rated + temperature + sky condition
+[x] Inverter max capacity — configurable in Settings; used in Inverter Load tile
+
+--------------------------------------------------------------------------------
+SECTION: REPORTS
+--------------------------------------------------------------------------------
+[x] Daily report    — hourly line/bar/donut charts + stat cards with kWh units
+[x] Weekly report   — last 7 days grouped bar + line + donut
+[x] Monthly report  — daily breakdown bar + line + donut
+[~] Yearly report   — REMOVED (too many SEMS API calls; 130+ requests per load)
+[x] Multiple chart types per period (line, bar, donut)
+[x] Self-sufficiency % stat card per period
+[x] Date picker — browse any past day / month / year via toolbar date inputs
+[~] Comparison mode — REMOVED (feature not needed, simplified codebase)
+[x] Progressive loading — daily shows in ~1–2s; weekly ~3–4s; monthly ~6–8s;
+    each section renders independently without blocking
+
+--------------------------------------------------------------------------------
+SECTION: SAVINGS & IMPACT
+--------------------------------------------------------------------------------
+[x] Cost savings calculator — solar kWh × tariff = money saved vs full grid
+[x] Grid cost tracker — grid kWh × tariff = what you actually paid
+[x] CO₂ offset — kg of carbon avoided based on solar generated
+[x] Best/worst day highlight — highest & lowest generation day in period
+[~] Cumulative savings chart — REMOVED (tied to yearly data, removed with yearly)
+[x] Bill estimator — projected monthly bill based on avg daily usage patterns
+    (shows: current bill, bill without solar, monthly saving)
+
+--------------------------------------------------------------------------------
+SECTION: EXPORT
+--------------------------------------------------------------------------------
+[x] Export to CSV — download raw daily/monthly data as spreadsheet
+    (/api/export/csv?period=daily|weekly|monthly&date=YYYY-MM-DD)
+[x] Export to PDF — browser print with print CSS (hides nav, shows all sub-panels)
+
+--------------------------------------------------------------------------------
+SECTION: UX & APP
+--------------------------------------------------------------------------------
+[x] Dark mode toggle — with localStorage persistence + system preference detection
+[x] Multi-section navigation — Live / Reports / Savings / Settings
+[x] Mobile PWA — manifest.json + service worker (caches app shell, skips API)
+    Files: static/manifest.json, static/sw.js, static/icon-192.svg, static/icon-512.svg
+[x] Responsive layout improvements — grid collapses to 1-col on mobile, smaller
+    font sizes, reduced padding, viewport-fit=cover for notched phones
+[x] Railway deployment — Procfile, runtime.txt, PORT/SECRET_KEY env vars, gunicorn
+
+--------------------------------------------------------------------------------
+SECTION: SETTINGS
+--------------------------------------------------------------------------------
+[x] Electricity tariff configuration (PKR/kWh)
+[x] CO₂ emission factor configuration (kg/kWh)
+[x] Currency symbol configuration
+[x] Grid alert threshold configuration (watts) — used by push alerts
+[x] Timezone setting — stored in settings.json, displayed in system info
+[x] Inverter max capacity (kW) — used in Inverter Load live tile
+[ ] Multiple plants support — if more inverters/stations are added
+    (currently shows current station; API groundwork done at /api/stations)
+
+================================================================================
+  NOTES
+================================================================================
+- Pakistan average grid CO₂ factor: ~0.40 kg CO₂ per kWh
+- Pakistan average electricity tariff (2026): ~Rs 50–65/kWh
+- Station: Home | Rawalpindi, Pakistan | 8 kW battery storage system
+- API: GoodWe SEMS Portal (hk.semsportal.com) — unofficial/undocumented API
+================================================================================

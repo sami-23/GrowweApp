@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar Reports — Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      .card { background: #161b22 !important; }
+      h1, label { color: #e6edf3 !important; }
+      .subtitle { color: #8b949e !important; }
+      input { background: #0d1117 !important; border-color: #30363d !important; color: #e6edf3 !important; }
+      .note { color: #8b949e !important; }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .logo-text { line-height: 1.2; }
+    .logo-text strong { display: block; font-size: 18px; color: #1a1a2e; }
+    .logo-text span { font-size: 13px; color: #666; }
+
+    h1 { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 28px; }
+
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #1a1a2e;
+      transition: border-color .2s;
+      outline: none;
+    }
+    input:focus { border-color: #f7971e; }
+
+    .error-box {
+      background: #fff3f3;
+      border: 1px solid #ffcdd2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #c62828;
+      margin-bottom: 18px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a2e;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 4px;
+    }
+    button[type="submit"]:hover { opacity: .9; transform: translateY(-1px); }
+    button[type="submit"]:active { transform: translateY(0); }
+
+    .note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">☀️</div>
+      <div class="logo-text">
+        <strong>Solar Reports</strong>
+        <span>Growatt monitoring</span>
+      </div>
+    </div>
+
+    <h1>Sign in</h1>
+    <p class="subtitle">Use your Growatt / ShinePhone account credentials</p>
+
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/">
+      <div class="field">
+        <label for="username">Email / Username</label>
+        <input type="email" id="username" name="username"
+               placeholder="you@example.com" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               placeholder="••••••••" required>
+      </div>
+      <button type="submit">View My Solar Reports →</button>
+    </form>
+
+    <p class="note">Your credentials are only used to fetch data from Growatt's servers.<br>
+    They are stored in your browser session only.</p>
+  </div>
+</body>
+</html>

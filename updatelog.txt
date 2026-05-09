@@ -1,0 +1,106 @@
+================================================================================
+  SOLAR REPORTS — UPDATE LOG
+================================================================================
+
+--------------------------------------------------------------------------------
+v0.4 — 2026-05-09  (All todo features — date picker, compare, flow diagram, etc.)
+--------------------------------------------------------------------------------
+ADDED
+  - Animated SVG power flow diagram (Live section) — directional dash animation
+    showing energy moving between Solar, Battery, Home, and Grid in real time
+  - Push alerts — browser notification when grid import exceeds configurable watt
+    threshold; bell toggle (🔔) in Live header; 5-minute cooldown between alerts
+  - Date picker toolbar in Reports — Daily uses date input, Weekly uses any date
+    in the target week, Monthly uses month picker, Yearly uses year number input
+  - Comparison mode — "Compare" button fetches previous period (prev day/week/
+    month/year) and overlays as dashed lines / lighter bars on all charts
+  - CSV export — /api/export/csv?period=X&date=Y returns a spreadsheet with date,
+    solar kWh, grid kWh, savings, CO₂ offset per row; "⬇ CSV" button in toolbar
+  - PDF export — "🖨 PDF" button calls window.print(); print CSS hides nav and
+    shows all sub-panels for a clean printable layout
+  - Monthly Bill Estimator (Savings section) — projects monthly grid bill, bill
+    without solar, and monthly saving based on this month's avg daily usage
+  - Cumulative savings area chart (Savings section) — running total of money saved
+    month-by-month this year using Chart.js gradient area fill
+  - Mobile PWA — static/manifest.json + static/sw.js service worker caches app
+    shell; icons in static/icon-192.svg and static/icon-512.svg
+  - Responsive improvements — viewport-fit=cover, tighter padding on mobile, grid
+    collapses correctly at 500px, nav wraps on small screens
+  - Alert threshold setting — configurable watt threshold for grid alert notifications
+  - Timezone setting — stored in settings.json, IANA name (e.g. Asia/Karachi)
+  - /api/export/csv Flask endpoint — streams CSV response with Content-Disposition
+  - /api/stations Flask endpoint — lists available power stations for account
+  - /api/report-data now accepts ?date=YYYY-MM-DD to shift the reference date for
+    all period calculations (daily/weekly/monthly/yearly relative to that date)
+
+CHANGED
+  - DEFAULT_SETTINGS expanded: alert_threshold (1000W), timezone (Asia/Karachi)
+  - settings_api now persists alert_threshold and timezone fields
+  - Live section header shows alert bell button beside station name
+  - Settings page shows Station ID in system info card
+
+--------------------------------------------------------------------------------
+v0.3 — 2026-05-09  (Multi-section UI + Live + Savings + Settings)
+--------------------------------------------------------------------------------
+ADDED
+  - Top-level navigation: Live / Reports / Savings / Settings
+  - Live section: real-time PV power, grid import, load, battery SOC tiles
+    with auto-refresh every 30 seconds and countdown timer
+  - Savings section: cost savings, grid cost, CO₂ offset, best/worst day cards
+    for selectable periods (Today / Week / Month / Year)
+  - Settings section: configure electricity tariff, CO₂ factor, currency symbol
+    — saved to settings.json, persisted across sessions
+  - /api/live endpoint returning current powerflow data
+  - /api/settings GET/POST endpoint for tariff/CO₂ configuration
+  - todo.txt and updatelog.txt tracking files
+
+CHANGED
+  - Report page restructured from single scrolling page into 4 separate sections
+  - Reports section retains Daily/Weekly/Monthly/Yearly sub-tabs with all charts
+
+--------------------------------------------------------------------------------
+v0.2 — 2026-05-09  (Dark mode + multiple chart types)
+--------------------------------------------------------------------------------
+ADDED
+  - Dark mode toggle (🌙/☀️) with localStorage persistence
+  - Respects OS-level prefers-color-scheme on first visit
+  - 3 chart types per report period: Line, Bar, Doughnut
+  - Polar Area chart in Yearly view (monthly solar radial breakdown)
+  - Self-sufficiency % stat card (solar ÷ total energy × 100)
+  - Hourly bar chart on Daily tab (5-min data bucketed into hourly kWh)
+  - Sticky header
+  - Badge labels on each chart card (Line / Bar / Donut)
+  - Dark-aware tooltip styling
+
+CHANGED
+  - Chart colours now reactive to dark/light mode switch
+  - Stat card redesign (larger value, better spacing)
+  - Grid layout uses two-one and three-column responsive grids
+
+--------------------------------------------------------------------------------
+v0.1 — 2026-05-09  (Initial release)
+--------------------------------------------------------------------------------
+ADDED
+  - Flask web app with SEMS Portal (GoodWe) API integration
+  - Login page with email/password authentication
+  - Session-based credential storage (browser session only)
+  - Report page with 4 tabs: Daily / Weekly / Monthly / Yearly
+  - Daily: hourly line chart showing solar kW and grid import kW (5-min intervals)
+  - Weekly: last 7 days bar chart with solar and grid kWh per day
+  - Monthly: day-by-day bar chart for current month
+  - Yearly: month-by-month bar chart for current year (grouped by month)
+  - Concurrent async API calls (all dates fetched in parallel via aiohttp)
+  - Sign convention confirmed: negative PCurve_Power_Meter = grid import
+  - Auto-detection of station ID and name from SEMS account
+  - Stat cards: solar total kWh, grid total kWh per period
+  - Chart.js 4.4 for all visualisations
+  - Responsive layout, clean card-based design
+
+TECHNICAL NOTES
+  - SEMS API login: POST https://www.semsportal.com/api/v1/Common/CrossLogin
+  - Chart data: POST {api}/v2/Charts/GetPlantPowerChart  (date: YYYY-MM-DD)
+  - Powerflow: POST {api}/v2/PowerStation/GetPowerflow
+  - No dedicated monthly/yearly endpoint found — daily calls aggregated client-side
+  - Station ID: a07b5e35-3c7c-4987-adce-d7adb3272ed8 (Home, Rawalpindi)
+
+================================================================================

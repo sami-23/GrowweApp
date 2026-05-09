@@ -1,0 +1,74 @@
+================================================================================
+  SOLAR REPORTS — FEATURE TODO LIST
+================================================================================
+
+STATUS KEY:  [x] Done   [-] In Progress   [ ] Pending
+
+--------------------------------------------------------------------------------
+SECTION: LIVE MONITORING
+--------------------------------------------------------------------------------
+[x] Live dashboard tile — real-time PV, grid, load, battery (auto-refresh 30s)
+[x] Push alerts — browser notification when grid import exceeds configurable threshold
+[x] Live power flow diagram — animated SVG showing energy flow between solar,
+    battery, home, and grid with directional dash animation
+
+--------------------------------------------------------------------------------
+SECTION: REPORTS
+--------------------------------------------------------------------------------
+[x] Daily report    — hourly line/bar/donut charts + stat cards
+[x] Weekly report   — last 7 days grouped bar + line + donut
+[x] Monthly report  — daily breakdown bar + line + donut
+[x] Yearly report   — monthly breakdown bar + line + donut + polar area
+[x] Multiple chart types per period (line, bar, donut, polar)
+[x] Self-sufficiency % stat card per period
+[x] Date picker — browse any past day / month / year via toolbar date inputs
+[x] Comparison mode — overlay previous period as dashed line/lighter bars;
+    "Compare" button in toolbar; fetches prev day/week/month/year automatically
+
+--------------------------------------------------------------------------------
+SECTION: SAVINGS & IMPACT
+--------------------------------------------------------------------------------
+[x] Cost savings calculator — solar kWh × tariff = money saved vs full grid
+[x] Grid cost tracker — grid kWh × tariff = what you actually paid
+[x] CO₂ offset — kg of carbon avoided based on solar generated
+[x] Best/worst day highlight — highest & lowest generation day in period
+[x] Cumulative savings chart — running monthly total of money saved this year
+[x] Bill estimator — projected monthly bill based on avg daily usage patterns
+    (shows: current bill, bill without solar, monthly saving)
+
+--------------------------------------------------------------------------------
+SECTION: EXPORT
+--------------------------------------------------------------------------------
+[x] Export to CSV — download raw daily/monthly data as spreadsheet
+    (/api/export/csv?period=daily|weekly|monthly|yearly&date=YYYY-MM-DD)
+[x] Export to PDF — browser print with print CSS (hides nav, shows all sub-panels)
+
+--------------------------------------------------------------------------------
+SECTION: UX & APP
+--------------------------------------------------------------------------------
+[x] Dark mode toggle — with localStorage persistence + system preference detection
+[x] Multi-section navigation — Live / Reports / Savings / Settings
+[x] Mobile PWA — manifest.json + service worker (caches app shell, skips API)
+    Files: static/manifest.json, static/sw.js, static/icon-192.svg, static/icon-512.svg
+[x] Responsive layout improvements — grid collapses to 1-col on mobile, smaller
+    font sizes, reduced padding, viewport-fit=cover for notched phones
+
+--------------------------------------------------------------------------------
+SECTION: SETTINGS
+--------------------------------------------------------------------------------
+[x] Electricity tariff configuration (PKR/kWh)
+[x] CO₂ emission factor configuration (kg/kWh)
+[x] Currency symbol configuration
+[x] Grid alert threshold configuration (watts) — used by push alerts
+[x] Timezone setting — stored in settings.json, displayed in system info
+[ ] Multiple plants support — if more inverters/stations are added
+    (currently shows current station; API groundwork done at /api/stations)
+
+================================================================================
+  NOTES
+================================================================================
+- Pakistan average grid CO₂ factor: ~0.40 kg CO₂ per kWh
+- Pakistan average electricity tariff (2026): ~Rs 50–65/kWh
+- Station: Home | Rawalpindi, Pakistan | 8 kW battery storage system
+- API: GoodWe SEMS Portal (hk.semsportal.com) — unofficial/undocumented API
+================================================================================

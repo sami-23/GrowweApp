@@ -3,6 +3,54 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v0.5 — 2026-05-09  (UX polish, performance, deployment prep)
+--------------------------------------------------------------------------------
+ADDED
+  - Directional arrows on Pulse and Solid flow animation styles — SVG marker
+    definitions (flow-arr, flow-arr-rev) auto-orient based on energy direction
+  - Inverter max capacity in settings — new inverter_kw field; Inverter Load tile
+    shows "X.X kW max" sub-label and percentage filled
+  - Dynamic HSL color coding for Live tiles via pctColor(pct, scheme):
+      'load' scheme: blue (0%) → amber (50%) → red (100%) for inverter load
+      'gen' scheme:  muted-blue (0%) → amber (50%) → green (100%) for solar/irr
+  - Estimated Generation Potential tile now shows percentage vs rated capacity
+  - Temperature display in Est. Generation Potential tile (from Open-Meteo
+    temperature_2m field) alongside sky condition badge
+  - Progressive/lazy loading in Reports — daily data loads and renders (~1–2 s)
+    before weekly (~3–4 s) then monthly (~6–8 s); each section appears as ready
+    instead of blocking on a full fetch; per-section sub-spinners
+  - Unit labels added throughout Reports tiles: kWh on all energy stat cards,
+    kW labels on chart y-axes, % on self-sufficiency cards
+  - Railway deployment files: Procfile (gunicorn 2w/4t/120s), runtime.txt
+    (python-3.12), updated requirements.txt, .gitignore
+
+CHANGED
+  - Inverter Load tile: percentage now shown large/highlighted on top; watt
+    value and max capacity shown as sub-label (matches Live Solar Power layout)
+  - Live Solar Power Generation tile: value (kW) now shown alongside percentage,
+    matching Inverter Load tile layout
+  - Estimated Generation Potential: percentage now displayed on the tile
+  - /api/report-data now accepts ?period=daily|weekly|monthly to fetch only the
+    dates needed for that period — reduces SEMS API calls significantly
+  - /api/solar-potential now returns temperature_c from Open-Meteo
+  - app.py secret key reads from SECRET_KEY env var (fallback for local dev)
+  - app.run() uses PORT env var and host='0.0.0.0' for Railway compatibility
+  - DEFAULT_SETTINGS includes inverter_kw field (default 0.0)
+
+REMOVED
+  - Yearly report sub-tab and sub-panel — too many SEMS API calls (130+ per load)
+  - Compare feature — ⇄ button, cmp-leg overlays, fetchCompareData(), toggleCompare(),
+    all cmp parameters removed from mkLine/mkBar/renderPeriod/renderReports
+  - Cumulative savings "This Year" chart and yearly savings button (tied to yearly)
+
+TECHNICAL NOTES
+  - pctColor(pct, 'load'): two-segment HSL; segment 1 h:199→45, segment 2 h:45→0
+  - pctColor(pct, 'gen'):  two-segment HSL; segment 1 h:210→45, segment 2 h:45→142
+  - SVG marker-end / marker-start set in setFlowPath(); inactive lines strip both
+  - loadPeriod(period, date) chains sequentially: daily → weekly → monthly
+  - Git repo initialized; initial commit d86675f; ready for GitHub push
+
+--------------------------------------------------------------------------------
 v0.4 — 2026-05-09  (All todo features — date picker, compare, flow diagram, etc.)
 --------------------------------------------------------------------------------
 ADDED

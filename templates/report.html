@@ -1734,8 +1734,11 @@ function updateFlowDiagram(d) {
   document.getElementById('fn-grid-dir').textContent = d.grid_importing ? '↓ import' : '↑ export';
 
   const batW = d.battery_w || 0;
-  const batCharging    = batW >  20;   // GoodWe: positive = charging
-  const batDischarging = batW < -20;   // GoodWe: negative = discharging
+  // GoodWe reports battery_w as an unsigned magnitude; infer direction from energy balance
+  const gridContrib    = d.grid_importing ? (d.grid_w || 0) : -(d.grid_w || 0);
+  const bat_net        = (d.load_w || 0) - (d.pv_w || 0) - gridContrib;
+  const batCharging    = bat_net < -20;   // excess supply → battery absorbing
+  const batDischarging = bat_net >  20;   // load deficit → battery providing
   const solarCharging  = batCharging && d.pv_w > 50;
   const gridCharging   = batCharging && d.pv_w <= 50;
 

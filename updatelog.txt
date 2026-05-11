@@ -3,6 +3,19 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v0.6 — 2026-05-11  (Bug fix)
+--------------------------------------------------------------------------------
+FIXED
+  - Flow diagram incorrectly showed "Solar charge" + solar→battery arrow when
+    solar and battery were both powering home (battery discharging)
+  - Root cause: GoodWe reports battery_w as an unsigned magnitude; the old
+    sign-based check (batW > 20 = charging, batW < -20 = discharging) always
+    treated an active battery as charging
+  - Fix: battery direction now inferred from energy balance —
+    bat_net = load_w − pv_w − grid_contribution; positive → discharging,
+    negative → charging; correct regardless of API sign convention
+
+--------------------------------------------------------------------------------
 v0.5 — 2026-05-09  (UX polish, performance, deployment prep)
 --------------------------------------------------------------------------------
 ADDED

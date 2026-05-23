@@ -3,6 +3,22 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v0.8 — 2026-05-23  (Source breakdown consistency + version display)
+--------------------------------------------------------------------------------
+ADDED
+  - Weekly and monthly tabs: Power Source Breakdown card — proportional bar
+    (solar / grid / battery) + 3 hour tiles; computed from 5-min interval
+    data already fetched, zero extra API calls
+  - Battery hours formula: total_period_hours − solar_hrs − grid_hrs
+  - App version shown on login homepage (subtle, bottom of card)
+
+CHANGED
+  - Daily Power Source Timeline tiles reduced from 4 to 3 (removed "Grid-free"
+    tile) to match weekly/monthly layout; timeline bar retains 4-colour detail
+  - Daily tile logic now uses shared renderSrcBreakdown() function
+  - Settings panel version updated to v0.8
+
+--------------------------------------------------------------------------------
 v0.7 — 2026-05-23  (Reports enhancements)
 --------------------------------------------------------------------------------
 ADDED

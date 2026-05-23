@@ -797,7 +797,7 @@
           <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid only</div>
           <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">☀️</div>
             <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="d-hrs-solar">—</div>
@@ -807,11 +807,6 @@
             <div style="font-size:18px;margin-bottom:4px">🔌</div>
             <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="d-hrs-grid">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
-          </div>
-          <div class="card" style="padding:10px 12px;text-align:center">
-            <div style="font-size:18px;margin-bottom:4px">🌞</div>
-            <div style="font-size:1.05rem;font-weight:700;color:#22c55e" id="d-hrs-clean">—</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid-free</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔋</div>
@@ -1246,7 +1241,7 @@
       Station ID: <span id="set-station-id" style="font-family:monospace;font-size:12px">—</span><br>
       API Region: Hong Kong (hk.semsportal.com)<br>
       Platform: GoodWe SEMS Portal<br>
-      App Version: v0.6
+      App Version: v0.8
     </div>
   </div>
 </div>
@@ -2163,11 +2158,8 @@ function renderDailyExtras(P) {
   if (avgSolar > 0) set('d-avg-solar', avgSolar, 2);
   else setText('d-avg-solar', '—');
 
-  // Hours tiles
-  setText('d-hrs-solar', prodHrs > 0 ? fmtHrs(prodHrs) : '—');
-  setText('d-hrs-grid',  gridHrs  > 0 ? fmtHrs(gridHrs)  : '—');
-  setText('d-hrs-clean', solarOnly > 0 ? fmtHrs(solarOnly) : '—');
-  setText('d-hrs-bat',   batIdle   > 0 ? fmtHrs(batIdle)   : '—');
+  // Source hours tiles (3-tile layout matching weekly/monthly)
+  renderSrcBreakdown('d', prodHrs, gridHrs, batIdle);
 
   // Timeline bar — group consecutive same-state intervals into flex segments
   const bar = document.getElementById('d-timeline-bar');

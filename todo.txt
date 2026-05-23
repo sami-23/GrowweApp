@@ -11,6 +11,7 @@ SECTION: LIVE MONITORING
 [x] Push alerts — browser notification when grid import exceeds configurable threshold
 [x] Live power flow diagram — animated SVG showing energy flow between solar,
     battery, home, and grid; Pulse/Solid/Dash animation styles with directional arrows
+[x] Inverter Load tile — includes battery contribution (load_w − grid_net formula)
 [x] Color-coded live tiles — dynamic HSL gradient (blue→amber→red for load,
     blue→amber→green for generation); updates each refresh
 [x] Inverter Load tile — percentage highlighted on top, kW value + max capacity below
@@ -31,6 +32,9 @@ SECTION: REPORTS
 [~] Comparison mode — REMOVED (feature not needed, simplified codebase)
 [x] Progressive loading — daily shows in ~1–2s; weekly ~3–4s; monthly ~6–8s;
     each section renders independently without blocking
+[x] Average generation stat cards — daily (avg kW during production) and weekly (avg kWh/day)
+[x] Power Source Timeline — daily 24h colour-coded bar + 4 hours tiles
+    (solar active, grid importing, grid-free, battery/idle) from 5-min intervals
 
 --------------------------------------------------------------------------------
 SECTION: SAVINGS & IMPACT

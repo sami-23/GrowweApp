@@ -3,6 +3,37 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v0.7 — 2026-05-23  (Reports enhancements)
+--------------------------------------------------------------------------------
+ADDED
+  - Daily tab: Avg Solar Power stat card — average kW output during solar
+    production hours (solar_total_kWh ÷ production hours)
+  - Daily tab: Power Source Timeline card — colour-coded 24-hour horizontal
+    bar built from every 5-min interval; four states:
+      Orange  = Solar only (no grid import)
+      Amber   = Solar + Grid both active
+      Red     = Grid only (no solar)
+      Purple  = Battery / Idle (neither solar nor grid active)
+  - Daily tab: Four hours tiles below the timeline bar showing duration in
+    each state: Solar active · Grid importing · Grid-free · Battery/Idle
+  - Weekly tab: Avg Daily Generation stat card (7-day total ÷ days, kWh/day)
+  - Inverter Load tile now includes battery contribution — formula changed
+    from pv_w + grid_net to load_w − grid_net (total inverter AC output)
+
+CHANGED
+  - Daily stat row expanded from 3 to 4 cards (added Avg Solar Power)
+  - Weekly stat row expanded from 3 to 4 cards (added Avg Daily Generation)
+  - Inverter Load tile description updated to reflect solar + battery + grid
+
+TECHNICAL NOTES
+  - fmtHrs(h): formats decimal hours → "Xh Ym" string
+  - renderDailyExtras(P): iterates 5-min intervals, classifies each into
+    one of four states (s/b/g/x), builds timeline and hour totals
+  - 50 W (0.05 kW) threshold used to filter sensor noise per interval
+  - Battery/Idle hours are inferred — GoodWe historical API has no per-
+    interval battery data; these intervals have no solar and no grid import
+
+--------------------------------------------------------------------------------
 v0.6 — 2026-05-11  (Bug fix)
 --------------------------------------------------------------------------------
 FIXED

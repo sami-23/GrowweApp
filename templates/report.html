@@ -799,8 +799,11 @@
             <button class="su-btn" data-unit="d" onclick="setSrcUnit('d','d',this)">Days</button>
           </div>
         </div>
-        <div id="d-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
-        <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <div style="position:relative;margin:10px 0 2px">
+          <div id="d-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden"></div>
+          <div id="d-timeline-axis" style="position:relative;height:18px;margin-top:3px"></div>
+        </div>
+        <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px;margin-top:8px">
           <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar only</div>
           <div class="leg"><div class="leg-box" style="background:#eab308"></div>Solar + Grid</div>
           <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid only</div>
@@ -2206,6 +2209,20 @@ function renderDailyExtras(P) {
   bar.innerHTML = groups.map(g =>
     `<div style="flex:${g.c};background:${colors[g.s]}" title="${lbls[g.s]}: ${fmtHrs(g.c * DT)}"></div>`
   ).join('');
+
+  // Time axis labels every 3 hours in 12-hour format
+  const axis = document.getElementById('d-timeline-axis');
+  if (axis && n > 0) {
+    const ticks = [];
+    for (let h = 0; h < 24; h += 3) {
+      const pct = (h * 12) / n * 100;
+      if (pct > 100) break;
+      const lbl = h === 0 ? '12am' : h < 12 ? h + 'am' : h === 12 ? '12pm' : (h - 12) + 'pm';
+      const xform = h === 0 ? 'none' : 'translateX(-50%)';
+      ticks.push(`<span style="position:absolute;left:${pct.toFixed(1)}%;transform:${xform};font-size:10px;color:var(--muted);white-space:nowrap">${lbl}</span>`);
+    }
+    axis.innerHTML = ticks.join('');
+  }
 }
 
 window._srcData = {};

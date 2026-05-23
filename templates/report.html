@@ -764,7 +764,7 @@
 
     <!-- Daily -->
     <div class="sub-panel active" id="sub-daily">
-      <div class="grid-3 mb12">
+      <div class="grid-4 mb12">
         <div class="card card-pad">
           <div class="stat-label"><span class="dot bg-solar"></span>Solar Generated Today</div>
           <div class="stat-value c-solar" id="d-solar">—</div><div class="stat-unit">kWh</div>
@@ -776,6 +776,48 @@
         <div class="card card-pad">
           <div class="stat-label"><span class="dot bg-green"></span>Self-Sufficiency</div>
           <div class="stat-value c-green" id="d-ratio">—</div><div class="stat-unit">%</div>
+        </div>
+        <div class="card card-pad">
+          <div class="stat-label"><span class="dot bg-solar"></span>Avg Solar Power</div>
+          <div class="stat-value c-solar" id="d-avg-solar">—</div><div class="stat-unit">kW</div>
+        </div>
+      </div>
+
+      <!-- Power Sources Timeline -->
+      <div class="card card-pad mb12">
+        <div class="chart-head">
+          <div class="chart-badge b-bar">Sources</div>
+          <div class="chart-title">Power Source Timeline</div>
+          <div class="chart-sub">5-minute breakdown of which energy source powered your home</div>
+        </div>
+        <div id="d-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
+        <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar only</div>
+          <div class="leg"><div class="leg-box" style="background:#eab308"></div>Solar + Grid</div>
+          <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid only</div>
+          <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">☀️</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="d-hrs-solar">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Solar active</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🔌</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="d-hrs-grid">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🌞</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#22c55e" id="d-hrs-clean">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid-free</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🔋</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#a855f7" id="d-hrs-bat">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
+          </div>
         </div>
       </div>
       <div class="card card-pad mb12">
@@ -810,10 +852,11 @@
     <!-- Weekly -->
     <div class="sub-panel" id="sub-weekly">
       <div class="sub-spin" id="spin-weekly"><div class="spinner"></div>Loading weekly data…</div>
-      <div class="grid-3 mb12">
+      <div class="grid-4 mb12">
         <div class="card card-pad"><div class="stat-label"><span class="dot bg-solar"></span>Solar — 7 Days</div><div class="stat-value c-solar" id="w-solar">—</div><div class="stat-unit">kWh</div></div>
         <div class="card card-pad"><div class="stat-label"><span class="dot bg-grid"></span>Grid — 7 Days</div><div class="stat-value c-grid" id="w-grid">—</div><div class="stat-unit">kWh</div></div>
         <div class="card card-pad"><div class="stat-label"><span class="dot bg-green"></span>Self-Sufficiency</div><div class="stat-value c-green" id="w-ratio">—</div><div class="stat-unit">%</div></div>
+        <div class="card card-pad"><div class="stat-label"><span class="dot bg-solar"></span>Avg Daily Generation</div><div class="stat-value c-solar" id="w-avg-daily">—</div><div class="stat-unit">kWh/day</div></div>
       </div>
       <div class="card card-pad mb12">
         <div class="chart-head"><div class="chart-badge b-bar">Grouped Bar</div><div class="chart-title">Daily Energy — Last 7 Days (kWh)</div><div class="chart-sub">Solar vs grid per day</div></div>
@@ -1113,7 +1156,7 @@
       </label>
       <label class="check-row">
         <input type="checkbox" id="tile-show-inv" checked onchange="setTileVisible('inv',this.checked)">
-        <span>⚡ Inverter Load<small>Combined solar + grid power handled by the inverter</small></span>
+        <span>⚡ Inverter Load<small>Total AC output of the inverter (solar + battery + grid)</small></span>
       </label>
       <label class="check-row">
         <input type="checkbox" id="tile-show-bat" checked onchange="setTileVisible('bat',this.checked)">
@@ -1898,8 +1941,9 @@ async function fetchLive() {
       if (utilSub) utilSub.textContent = 'Set rated kW in Settings';
     }
 
-    // Inverter load = solar + grid (net power the inverter is handling)
-    const invW   = Math.max(0, (d.pv_w || 0) + (d.grid_importing ? (d.grid_w || 0) : -(d.grid_w || 0)));
+    // Inverter AC output = home load + grid export − grid import
+    // (battery discharges through DC bus, so load_w already includes its contribution)
+    const invW   = Math.max(0, (d.load_w || 0) + (d.grid_importing ? -(d.grid_w || 0) : (d.grid_w || 0)));
     const invKw  = window._settings?.inverter_kw || 0;
     const invEl  = document.getElementById('lv-inv');
     const invSub = document.getElementById('lv-inv-sub');
@@ -2023,17 +2067,80 @@ async function preloadReports() {
   await loadAllPeriods();
 }
 
+function fmtHrs(h) {
+  const hrs  = Math.floor(h);
+  const mins = Math.round((h - hrs) * 60);
+  if (hrs === 0) return mins + 'm';
+  if (mins === 0) return hrs + 'h';
+  return hrs + 'h ' + mins + 'm';
+}
+
+function renderDailyExtras(P) {
+  const solar = P.solar, grid = P.grid;
+  const n = solar.length;
+  if (!n) return;
+
+  const DT     = 5 / 60;  // hours per 5-min interval
+  const THRESH = 0.05;    // kW — ignore sensor noise below 50 W
+
+  let solarOnly = 0, bothOn = 0, gridOnly = 0, batIdle = 0;
+  const segs = [];
+
+  for (let i = 0; i < n; i++) {
+    const pvOn = solar[i] > THRESH;
+    const gOn  = grid[i]  > THRESH;
+    if      (pvOn && !gOn) { segs.push('s'); solarOnly += DT; }
+    else if (pvOn &&  gOn) { segs.push('b'); bothOn    += DT; }
+    else if (!pvOn && gOn) { segs.push('g'); gridOnly  += DT; }
+    else                   { segs.push('x'); batIdle   += DT; }
+  }
+
+  const prodHrs = solarOnly + bothOn;
+  const gridHrs = gridOnly  + bothOn;
+
+  // Average solar power during production periods
+  const avgSolar = prodHrs > 0 ? P.solar_total / prodHrs : 0;
+  if (avgSolar > 0) set('d-avg-solar', avgSolar, 2);
+  else setText('d-avg-solar', '—');
+
+  // Hours tiles
+  setText('d-hrs-solar', prodHrs > 0 ? fmtHrs(prodHrs) : '—');
+  setText('d-hrs-grid',  gridHrs  > 0 ? fmtHrs(gridHrs)  : '—');
+  setText('d-hrs-clean', solarOnly > 0 ? fmtHrs(solarOnly) : '—');
+  setText('d-hrs-bat',   batIdle   > 0 ? fmtHrs(batIdle)   : '—');
+
+  // Timeline bar — group consecutive same-state intervals into flex segments
+  const bar = document.getElementById('d-timeline-bar');
+  if (!bar) return;
+
+  const groups = [];
+  for (const s of segs) {
+    if (groups.length && groups[groups.length - 1].s === s) groups[groups.length - 1].c++;
+    else groups.push({ s, c: 1 });
+  }
+
+  const colors = { s: '#f7971e', b: '#eab308', g: '#ef4444', x: '#a855f7' };
+  const lbls   = { s: 'Solar only', b: 'Solar + Grid', g: 'Grid only', x: 'Battery / Idle' };
+  bar.innerHTML = groups.map(g =>
+    `<div style="flex:${g.c};background:${colors[g.s]}" title="${lbls[g.s]}: ${fmtHrs(g.c * DT)}"></div>`
+  ).join('');
+}
+
 function renderPeriod(period, d) {
   if (!d || !d[period]) return;
   const P = d[period];
   showSubSpin(period, false);
   if (period === 'daily') {
     set('d-solar', P.solar_total); set('d-grid', P.grid_total); set('d-ratio', selfPct(P.solar_total, P.grid_total), 1);
+    renderDailyExtras(P);
     mkLine('d-line', P.labels, P.solar, P.grid, 'kW');
     mkHourlyBar('d-bar', P.labels, P.solar, P.grid);
     mkDonut('d-donut', P.solar_total, P.grid_total);
   } else if (period === 'weekly') {
     set('w-solar', P.solar_total); set('w-grid', P.grid_total); set('w-ratio', selfPct(P.solar_total, P.grid_total), 1);
+    const wDays = (P.labels && P.labels.length) || 7;
+    const wAvg  = P.solar_total / wDays;
+    if (wAvg > 0) set('w-avg-daily', wAvg, 2); else setText('w-avg-daily', '—');
     mkBar ('w-bar',  P.labels, P.solar, P.grid, 'kWh');
     mkLine('w-line', P.labels, P.solar, P.grid, 'kWh');
     mkDonut('w-donut', P.solar_total, P.grid_total);

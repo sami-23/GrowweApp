@@ -713,7 +713,7 @@
   </div>
 
   <!-- Day/Month/Total KPIs -->
-  <div class="grid-3" id="live-kpi-row">
+  <div class="grid-3 mb16" id="live-kpi-row">
     <div class="card card-pad">
       <div class="stat-label"><span class="dot bg-solar"></span>Generated Today</div>
       <div class="stat-value c-solar" id="lv-eday">—</div>
@@ -728,6 +728,25 @@
       <div class="stat-label"><span class="dot bg-green"></span>Generated All Time</div>
       <div class="stat-value c-green" id="lv-etotal">—</div>
       <div class="stat-unit">kWh</div>
+    </div>
+  </div>
+
+  <!-- Today's power source timeline -->
+  <div class="card card-pad">
+    <div>
+      <div class="chart-badge b-bar">Today</div>
+      <div class="chart-title">Today's Power Source Timeline</div>
+      <div class="chart-sub" id="live-timeline-sub">Loading…</div>
+    </div>
+    <div style="position:relative;margin:10px 0 2px">
+      <div id="live-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--border)"></div>
+      <div id="live-timeline-axis" style="position:relative;height:18px;margin-top:3px"></div>
+    </div>
+    <div class="legend" style="flex-wrap:wrap;gap:8px">
+      <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar only</div>
+      <div class="leg"><div class="leg-box" style="background:#eab308"></div>Solar + Grid</div>
+      <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid only</div>
+      <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
     </div>
   </div>
 </div>
@@ -2054,20 +2073,67 @@ async function fetchLive() {
   }
 }
 
+function renderLiveTimeline(solar, grid) {
+  const n = solar ? solar.length : 0;
+  if (!n) return;
+  const THRESH = 0.05, DT = 5 / 60;
+
+  const segs = [];
+  for (let i = 0; i < n; i++) {
+    const pvOn = solar[i] > THRESH, gOn = grid[i] > THRESH;
+    if      (pvOn && !gOn) segs.push('s');
+    else if (pvOn &&  gOn) segs.push('b');
+    else if (!pvOn && gOn) segs.push('g');
+    else                   segs.push('x');
+  }
+
+  const groups = [];
+  for (const s of segs) {
+    if (groups.length && groups[groups.length-1].s === s) groups[groups.length-1].c++;
+    else groups.push({ s, c: 1 });
+  }
+
+  const colors = { s:'#f7971e', b:'#eab308', g:'#ef4444', x:'#a855f7' };
+  const lbls   = { s:'Solar only', b:'Solar + Grid', g:'Grid only', x:'Battery / Idle' };
+  const bar    = document.getElementById('live-timeline-bar');
+  if (bar) {
+    bar.innerHTML = groups.map(g =>
+      `<div style="flex:${g.c};background:${colors[g.s]}" title="${lbls[g.s]}: ${fmtHrs(g.c*DT)}"></div>`
+    ).join('');
+  }
+  buildTimeAxis(document.getElementById('live-timeline-axis'), n, DT);
+
+  const sub = document.getElementById('live-timeline-sub');
+  if (sub) sub.textContent = `5-minute breakdown — ${fmtHrs(n * DT)} since midnight`;
+}
+
+async function fetchLiveTimeline() {
+  try {
+    const cached = window._rptData?.daily;
+    if (cached) { renderLiveTimeline(cached.solar, cached.grid); return; }
+    const resp = await fetch('/api/report-data?period=daily');
+    const d    = await resp.json();
+    if (d.daily) renderLiveTimeline(d.daily.solar, d.daily.grid);
+  } catch(e) { /* non-critical */ }
+}
+
 function startLiveRefresh() {
   fetchLive();
   fetchSolarPotential();
+  fetchLiveTimeline();
   liveCountdown = 30;
   clearInterval(liveTimer);
   clearInterval(irrTimer);
+  clearInterval(window._tlTimer);
   liveTimer = setInterval(() => {
     liveCountdown--;
     setText('live-countdown', `Refreshing in ${liveCountdown}s`);
     document.getElementById('refresh-fill').style.width = (liveCountdown / 30 * 100) + '%';
     if (liveCountdown <= 0) { liveCountdown = 30; fetchLive(); }
   }, 1000);
-  // Irradiance updates every 5 minutes (changes slowly)
+  // Irradiance and timeline update every 5 minutes (change slowly)
   irrTimer = setInterval(fetchSolarPotential, 5 * 60 * 1000);
+  window._tlTimer = setInterval(fetchLiveTimeline, 5 * 60 * 1000);
 }
 
 // ═══ REPORTS — progressive per-period loading ════════════════════════════════
@@ -2163,6 +2229,37 @@ function fmtHrs(h) {
   return hrs + 'h ' + mins + 'm';
 }
 
+function pickTickStep(totalHours) {
+  for (const s of [0.25, 0.5, 1, 2, 3, 4, 6]) {
+    if (totalHours / s <= 8) return s;
+  }
+  return 6;
+}
+
+function fmtAxisLabel(h) {
+  const totalMins = Math.round(h * 60);
+  const hr   = Math.floor(totalMins / 60) % 24;
+  const min  = totalMins % 60;
+  const ampm = hr < 12 ? 'am' : 'pm';
+  const hr12 = hr === 0 ? 12 : hr > 12 ? hr - 12 : hr;
+  if (min === 0) return hr12 + ampm;
+  return hr12 + ':' + String(min).padStart(2, '0') + ampm;
+}
+
+function buildTimeAxis(axisEl, n, DT) {
+  if (!axisEl || n <= 0) return;
+  const totalHours = n * DT;
+  const step = pickTickStep(totalHours);
+  const ticks = [];
+  for (let h = 0; h <= totalHours + 0.001; h += step) {
+    if (h > totalHours + 0.001) break;
+    const pct    = Math.min((h / totalHours) * 100, 100);
+    const xform  = h < 0.001 ? 'none' : 'translateX(-50%)';
+    ticks.push(`<span style="position:absolute;left:${pct.toFixed(1)}%;transform:${xform};font-size:10px;color:var(--muted);white-space:nowrap">${fmtAxisLabel(h)}</span>`);
+  }
+  axisEl.innerHTML = ticks.join('');
+}
+
 function renderDailyExtras(P) {
   const solar = P.solar, grid = P.grid;
   const n = solar.length;
@@ -2210,19 +2307,7 @@ function renderDailyExtras(P) {
     `<div style="flex:${g.c};background:${colors[g.s]}" title="${lbls[g.s]}: ${fmtHrs(g.c * DT)}"></div>`
   ).join('');
 
-  // Time axis labels every 3 hours in 12-hour format
-  const axis = document.getElementById('d-timeline-axis');
-  if (axis && n > 0) {
-    const ticks = [];
-    for (let h = 0; h < 24; h += 3) {
-      const pct = (h * 12) / n * 100;
-      if (pct > 100) break;
-      const lbl = h === 0 ? '12am' : h < 12 ? h + 'am' : h === 12 ? '12pm' : (h - 12) + 'pm';
-      const xform = h === 0 ? 'none' : 'translateX(-50%)';
-      ticks.push(`<span style="position:absolute;left:${pct.toFixed(1)}%;transform:${xform};font-size:10px;color:var(--muted);white-space:nowrap">${lbl}</span>`);
-    }
-    axis.innerHTML = ticks.join('');
-  }
+  buildTimeAxis(document.getElementById('d-timeline-axis'), n, DT);
 }
 
 window._srcData = {};

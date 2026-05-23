@@ -36,6 +36,8 @@ SECTION: REPORTS
 [x] Power Source Timeline — daily 24h colour-coded bar + 3 hours tiles
     (solar active, grid importing, battery/idle); weekly and monthly proportional
     bar + 3 tiles via energy balance formula (zero extra API calls)
+[x] Source breakdown tiles — percentage share shown below each hour/day value;
+    unit toggle (Hrs/Days) per card, persisted in localStorage per prefix
 
 --------------------------------------------------------------------------------
 SECTION: SAVINGS & IMPACT

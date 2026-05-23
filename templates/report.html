@@ -810,16 +810,19 @@
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">☀️</div>
             <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="d-hrs-solar">—</div>
+            <div style="font-size:11px;color:#f7971e;opacity:.75" id="d-pct-solar">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Solar active</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔌</div>
             <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="d-hrs-grid">—</div>
+            <div style="font-size:11px;color:#ef4444;opacity:.75" id="d-pct-grid">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔋</div>
             <div style="font-size:1.05rem;font-weight:700;color:#a855f7" id="d-hrs-bat">—</div>
+            <div style="font-size:11px;color:#a855f7;opacity:.75" id="d-pct-bat">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
           </div>
         </div>
@@ -884,16 +887,19 @@
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">☀️</div>
             <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="w-hrs-solar">—</div>
+            <div style="font-size:11px;color:#f7971e;opacity:.75" id="w-pct-solar">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Solar active</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔌</div>
             <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="w-hrs-grid">—</div>
+            <div style="font-size:11px;color:#ef4444;opacity:.75" id="w-pct-grid">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔋</div>
             <div style="font-size:1.05rem;font-weight:700;color:#a855f7" id="w-hrs-bat">—</div>
+            <div style="font-size:11px;color:#a855f7;opacity:.75" id="w-pct-bat">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
           </div>
         </div>
@@ -943,16 +949,19 @@
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">☀️</div>
             <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="m-hrs-solar">—</div>
+            <div style="font-size:11px;color:#f7971e;opacity:.75" id="m-pct-solar">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Solar active</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔌</div>
             <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="m-hrs-grid">—</div>
+            <div style="font-size:11px;color:#ef4444;opacity:.75" id="m-pct-grid">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
           </div>
           <div class="card" style="padding:10px 12px;text-align:center">
             <div style="font-size:18px;margin-bottom:4px">🔋</div>
             <div style="font-size:1.05rem;font-weight:700;color:#a855f7" id="m-hrs-bat">—</div>
+            <div style="font-size:11px;color:#a855f7;opacity:.75" id="m-pct-bat">—</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
           </div>
         </div>
@@ -1262,7 +1271,7 @@
       Station ID: <span id="set-station-id" style="font-family:monospace;font-size:12px">—</span><br>
       API Region: Hong Kong (hk.semsportal.com)<br>
       Platform: GoodWe SEMS Portal<br>
-      App Version: v0.8
+      App Version: v0.9
     </div>
   </div>
 </div>
@@ -2241,9 +2250,13 @@ function renderSrcBreakdown(prefix, sh, gh, bh) {
   window._srcData[prefix] = { sh, gh, bh };
   const unit = getSrcUnit(prefix);
   initSrcUnitBtns(prefix);
+  const total = (sh + gh + bh) || 1;
   setText(prefix + '-hrs-solar', fmtSrcVal(sh, unit));
   setText(prefix + '-hrs-grid',  fmtSrcVal(gh, unit));
   setText(prefix + '-hrs-bat',   fmtSrcVal(bh, unit));
+  setText(prefix + '-pct-solar', Math.round(sh / total * 100) + '%');
+  setText(prefix + '-pct-grid',  Math.round(gh / total * 100) + '%');
+  setText(prefix + '-pct-bat',   Math.round(bh / total * 100) + '%');
   const bar = document.getElementById(prefix + '-src-bar');
   if (!bar) return;
   const segs = [{v:sh, c:'#f7971e', l:'Solar'}, {v:gh, c:'#ef4444', l:'Grid'}, {v:bh, c:'#a855f7', l:'Battery / Idle'}];

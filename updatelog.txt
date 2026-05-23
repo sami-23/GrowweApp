@@ -3,6 +3,26 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v0.9 — 2026-05-23  (Source breakdown enhancements)
+--------------------------------------------------------------------------------
+ADDED
+  - Source breakdown tiles (daily/weekly/monthly): percentage share shown below
+    each value (e.g. "62%") computed as tile_hours ÷ total_hours × 100
+  - Hrs/Days unit toggle on each source breakdown card — radio buttons saved
+    per card in localStorage (srcUnit_d, srcUnit_w, srcUnit_m); persists across
+    page reloads and restarts
+  - Weekly/monthly source breakdown card repositioned to the top of each tab
+
+CHANGED
+  - renderSrcBreakdown() now sets prefix-pct-solar/grid/bat elements
+  - Settings panel and login page updated to v0.9
+
+TECHNICAL NOTES
+  - total = sh + gh + bh (or 1 to avoid div-by-zero)
+  - fmtSrcVal(h, unit): formats hours or days string per selected unit
+  - getSrcUnit/setSrcUnit/initSrcUnitBtns: localStorage helpers for unit persistence
+
+--------------------------------------------------------------------------------
 v0.8 — 2026-05-23  (Source breakdown consistency + version display)
 --------------------------------------------------------------------------------
 ADDED

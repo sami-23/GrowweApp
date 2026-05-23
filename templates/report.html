@@ -863,13 +863,43 @@
         <div class="chart-wrap h-300"><canvas id="w-bar"></canvas></div>
         <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
       </div>
-      <div class="grid-2-1">
+      <div class="grid-2-1 mb12">
         <div class="card card-pad">
           <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — 7 Days</div><div class="chart-sub">Generation and grid draw trend</div></div>
           <div class="chart-wrap h-240"><canvas id="w-line"></canvas></div>
           <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
         </div>
         <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Weekly Split</div><div class="chart-sub">Solar vs grid — 7 days</div></div><div class="chart-wrap h-240"><canvas id="w-donut"></canvas></div></div>
+      </div>
+      <div class="card card-pad">
+        <div class="chart-head">
+          <div class="chart-badge b-bar">Sources</div>
+          <div class="chart-title">Power Source Breakdown — 7 Days</div>
+          <div class="chart-sub">Estimated hours on each source (battery = 168h − solar hrs − grid hrs)</div>
+        </div>
+        <div id="w-src-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
+        <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar</div>
+          <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid</div>
+          <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">☀️</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="w-hrs-solar">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Solar active</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🔌</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="w-hrs-grid">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🔋</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#a855f7" id="w-hrs-bat">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -886,13 +916,43 @@
         <div class="chart-wrap h-300"><canvas id="m-bar"></canvas></div>
         <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
       </div>
-      <div class="grid-2-1">
+      <div class="grid-2-1 mb12">
         <div class="card card-pad">
           <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — This Month</div><div class="chart-sub">Solar and grid trend over the month</div></div>
           <div class="chart-wrap h-240"><canvas id="m-line"></canvas></div>
           <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
         </div>
         <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Monthly Split</div><div class="chart-sub">Solar vs grid this month</div></div><div class="chart-wrap h-240"><canvas id="m-donut"></canvas></div></div>
+      </div>
+      <div class="card card-pad">
+        <div class="chart-head">
+          <div class="chart-badge b-bar">Sources</div>
+          <div class="chart-title">Power Source Breakdown — This Month</div>
+          <div class="chart-sub">Estimated hours on each source (battery = total hours − solar hrs − grid hrs)</div>
+        </div>
+        <div id="m-src-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
+        <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar</div>
+          <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid</div>
+          <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">☀️</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#f7971e" id="m-hrs-solar">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Solar active</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🔌</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#ef4444" id="m-hrs-grid">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Grid importing</div>
+          </div>
+          <div class="card" style="padding:10px 12px;text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">🔋</div>
+            <div style="font-size:1.05rem;font-weight:700;color:#a855f7" id="m-hrs-bat">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2126,6 +2186,20 @@ function renderDailyExtras(P) {
   ).join('');
 }
 
+function renderSrcBreakdown(prefix, sh, gh, bh) {
+  if (sh == null) return;
+  const total = sh + gh + bh || 1;
+  setText(prefix + '-hrs-solar', fmtHrs(sh));
+  setText(prefix + '-hrs-grid',  fmtHrs(gh));
+  setText(prefix + '-hrs-bat',   fmtHrs(bh));
+  const bar = document.getElementById(prefix + '-src-bar');
+  if (!bar) return;
+  const segs = [{v: sh, c:'#f7971e', l:'Solar'}, {v: gh, c:'#ef4444', l:'Grid'}, {v: bh, c:'#a855f7', l:'Battery / Idle'}];
+  bar.innerHTML = segs.filter(s => s.v > 0).map(s =>
+    `<div style="flex:${s.v};background:${s.c}" title="${s.l}: ${fmtHrs(s.v)}"></div>`
+  ).join('');
+}
+
 function renderPeriod(period, d) {
   if (!d || !d[period]) return;
   const P = d[period];
@@ -2144,11 +2218,13 @@ function renderPeriod(period, d) {
     mkBar ('w-bar',  P.labels, P.solar, P.grid, 'kWh');
     mkLine('w-line', P.labels, P.solar, P.grid, 'kWh');
     mkDonut('w-donut', P.solar_total, P.grid_total);
+    renderSrcBreakdown('w', P.solar_hrs, P.grid_hrs, P.bat_hrs);
   } else if (period === 'monthly') {
     set('m-solar', P.solar_total); set('m-grid', P.grid_total); set('m-ratio', selfPct(P.solar_total, P.grid_total), 1);
     mkBar ('m-bar',  P.labels, P.solar, P.grid, 'kWh');
     mkLine('m-line', P.labels, P.solar, P.grid, 'kWh');
     mkDonut('m-donut', P.solar_total, P.grid_total);
+    renderSrcBreakdown('m', P.solar_hrs, P.grid_hrs, P.bat_hrs);
   }
 }
 

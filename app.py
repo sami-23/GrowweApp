@@ -273,14 +273,34 @@ def report_data():
         def get(d):
             return day_cache.get(d, {'solar_kwh': 0, 'grid_kwh': 0, 'points': []})
 
-        def mk(labels, solar, grid, solar_total, grid_total):
-            return {
+        def day_hours(points):
+            """Return (solar_h, grid_h) for a day's 5-min interval points."""
+            THRESH = 0.05  # kW
+            DT     = 5 / 60
+            s = g  = 0.0
+            for _, pv, grd in points:
+                if pv  > THRESH: s += DT
+                if grd > THRESH: g += DT
+            return s, g
+
+        def mk(labels, solar, grid, solar_total, grid_total, days_points=None):
+            out = {
                 'labels':      labels,
                 'solar':       [round(v, 2) for v in solar],
                 'grid':        [round(v, 2) for v in grid],
                 'solar_total': round(solar_total, 2),
                 'grid_total':  round(grid_total, 2),
             }
+            if days_points is not None:
+                sh = gh = 0.0
+                for pts in days_points:
+                    s, g = day_hours(pts)
+                    sh += s; gh += g
+                bh = max(0.0, len(days_points) * 24 - sh - gh)
+                out['solar_hrs']  = round(sh, 2)
+                out['grid_hrs']   = round(gh, 2)
+                out['bat_hrs']    = round(bh, 2)
+            return out
 
         resp = {'station_name': name, 'as_of': datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}
 
@@ -294,16 +314,18 @@ def report_data():
             )
 
         if fetch_weekly:
-            w_solar = [get(d)['solar_kwh'] for d in week_dates]
-            w_grid  = [get(d)['grid_kwh']  for d in week_dates]
+            w_solar  = [get(d)['solar_kwh'] for d in week_dates]
+            w_grid   = [get(d)['grid_kwh']  for d in week_dates]
+            w_points = [get(d)['points']    for d in week_dates]
             resp['weekly'] = mk([d.strftime('%a %d %b') for d in week_dates],
-                                w_solar, w_grid, sum(w_solar), sum(w_grid))
+                                w_solar, w_grid, sum(w_solar), sum(w_grid), w_points)
 
         if fetch_monthly:
-            m_solar = [get(d)['solar_kwh'] for d in month_dates]
-            m_grid  = [get(d)['grid_kwh']  for d in month_dates]
+            m_solar  = [get(d)['solar_kwh'] for d in month_dates]
+            m_grid   = [get(d)['grid_kwh']  for d in month_dates]
+            m_points = [get(d)['points']    for d in month_dates]
             resp['monthly'] = mk([d.strftime('%d %b') for d in month_dates],
-                                 m_solar, m_grid, sum(m_solar), sum(m_grid))
+                                 m_solar, m_grid, sum(m_solar), sum(m_grid), m_points)
 
         if fetch_yearly:
             y_months = list(range(1, today.month + 1))

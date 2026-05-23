@@ -376,6 +376,9 @@
 
     /* ── CHARTS ──────────────────────────────────── */
     .chart-head { margin-bottom:12px; }
+    .src-unit-btns { display:flex; gap:3px; flex-shrink:0; }
+    .su-btn { font-size:11px; padding:3px 9px; border-radius:4px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted); transition:background .15s,color .15s,border-color .15s; }
+    .su-btn.active { background:#f7971e; color:#1a1a2e; border-color:#f7971e; }
     .chart-badge { display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:2px 7px; border-radius:20px; margin-bottom:4px; }
     .b-line  { background:rgba(247,151,30,.15); color:var(--solar); }
     .b-bar   { background:rgba(79,134,198,.15);  color:var(--grid); }
@@ -785,10 +788,16 @@
 
       <!-- Power Sources Timeline -->
       <div class="card card-pad mb12">
-        <div class="chart-head">
-          <div class="chart-badge b-bar">Sources</div>
-          <div class="chart-title">Power Source Timeline</div>
-          <div class="chart-sub">5-minute breakdown of which energy source powered your home</div>
+        <div class="chart-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div class="chart-badge b-bar">Sources</div>
+            <div class="chart-title">Power Source Timeline</div>
+            <div class="chart-sub">5-minute breakdown of which energy source powered your home</div>
+          </div>
+          <div class="src-unit-btns" id="su-d">
+            <button class="su-btn" data-unit="h" onclick="setSrcUnit('d','h',this)">Hrs</button>
+            <button class="su-btn" data-unit="d" onclick="setSrcUnit('d','d',this)">Days</button>
+          </div>
         </div>
         <div id="d-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
         <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
@@ -854,23 +863,16 @@
         <div class="card card-pad"><div class="stat-label"><span class="dot bg-solar"></span>Avg Daily Generation</div><div class="stat-value c-solar" id="w-avg-daily">—</div><div class="stat-unit">kWh/day</div></div>
       </div>
       <div class="card card-pad mb12">
-        <div class="chart-head"><div class="chart-badge b-bar">Grouped Bar</div><div class="chart-title">Daily Energy — Last 7 Days (kWh)</div><div class="chart-sub">Solar vs grid per day</div></div>
-        <div class="chart-wrap h-300"><canvas id="w-bar"></canvas></div>
-        <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
-      </div>
-      <div class="grid-2-1 mb12">
-        <div class="card card-pad">
-          <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — 7 Days</div><div class="chart-sub">Generation and grid draw trend</div></div>
-          <div class="chart-wrap h-240"><canvas id="w-line"></canvas></div>
-          <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
-        </div>
-        <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Weekly Split</div><div class="chart-sub">Solar vs grid — 7 days</div></div><div class="chart-wrap h-240"><canvas id="w-donut"></canvas></div></div>
-      </div>
-      <div class="card card-pad">
-        <div class="chart-head">
-          <div class="chart-badge b-bar">Sources</div>
-          <div class="chart-title">Power Source Breakdown — 7 Days</div>
-          <div class="chart-sub">Estimated hours on each source (battery = 168h − solar hrs − grid hrs)</div>
+        <div class="chart-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div class="chart-badge b-bar">Sources</div>
+            <div class="chart-title">Power Source Breakdown — 7 Days</div>
+            <div class="chart-sub">Hours each source powered your home (battery = 168h − solar − grid)</div>
+          </div>
+          <div class="src-unit-btns" id="su-w">
+            <button class="su-btn" data-unit="h" onclick="setSrcUnit('w','h',this)">Hrs</button>
+            <button class="su-btn" data-unit="d" onclick="setSrcUnit('w','d',this)">Days</button>
+          </div>
         </div>
         <div id="w-src-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
         <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
@@ -896,6 +898,19 @@
           </div>
         </div>
       </div>
+      <div class="card card-pad mb12">
+        <div class="chart-head"><div class="chart-badge b-bar">Grouped Bar</div><div class="chart-title">Daily Energy — Last 7 Days (kWh)</div><div class="chart-sub">Solar vs grid per day</div></div>
+        <div class="chart-wrap h-300"><canvas id="w-bar"></canvas></div>
+        <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
+      </div>
+      <div class="grid-2-1">
+        <div class="card card-pad">
+          <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — 7 Days</div><div class="chart-sub">Generation and grid draw trend</div></div>
+          <div class="chart-wrap h-240"><canvas id="w-line"></canvas></div>
+          <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
+        </div>
+        <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Weekly Split</div><div class="chart-sub">Solar vs grid — 7 days</div></div><div class="chart-wrap h-240"><canvas id="w-donut"></canvas></div></div>
+      </div>
     </div>
 
     <!-- Monthly -->
@@ -907,23 +922,16 @@
         <div class="card card-pad"><div class="stat-label"><span class="dot bg-green"></span>Self-Sufficiency</div><div class="stat-value c-green" id="m-ratio">—</div><div class="stat-unit">%</div></div>
       </div>
       <div class="card card-pad mb12">
-        <div class="chart-head"><div class="chart-badge b-bar">Bar</div><div class="chart-title">Daily Breakdown — This Month (kWh)</div><div class="chart-sub">Day-by-day solar and grid energy</div></div>
-        <div class="chart-wrap h-300"><canvas id="m-bar"></canvas></div>
-        <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
-      </div>
-      <div class="grid-2-1 mb12">
-        <div class="card card-pad">
-          <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — This Month</div><div class="chart-sub">Solar and grid trend over the month</div></div>
-          <div class="chart-wrap h-240"><canvas id="m-line"></canvas></div>
-          <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
-        </div>
-        <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Monthly Split</div><div class="chart-sub">Solar vs grid this month</div></div><div class="chart-wrap h-240"><canvas id="m-donut"></canvas></div></div>
-      </div>
-      <div class="card card-pad">
-        <div class="chart-head">
-          <div class="chart-badge b-bar">Sources</div>
-          <div class="chart-title">Power Source Breakdown — This Month</div>
-          <div class="chart-sub">Estimated hours on each source (battery = total hours − solar hrs − grid hrs)</div>
+        <div class="chart-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div class="chart-badge b-bar">Sources</div>
+            <div class="chart-title">Power Source Breakdown — This Month</div>
+            <div class="chart-sub">Hours each source powered your home (battery = total hrs − solar − grid)</div>
+          </div>
+          <div class="src-unit-btns" id="su-m">
+            <button class="su-btn" data-unit="h" onclick="setSrcUnit('m','h',this)">Hrs</button>
+            <button class="su-btn" data-unit="d" onclick="setSrcUnit('m','d',this)">Days</button>
+          </div>
         </div>
         <div id="m-src-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;margin:10px 0 6px"></div>
         <div class="legend" style="flex-wrap:wrap;gap:8px;margin-bottom:14px">
@@ -948,6 +956,19 @@
             <div style="font-size:11px;color:var(--muted);margin-top:2px">Battery / Idle</div>
           </div>
         </div>
+      </div>
+      <div class="card card-pad mb12">
+        <div class="chart-head"><div class="chart-badge b-bar">Bar</div><div class="chart-title">Daily Breakdown — This Month (kWh)</div><div class="chart-sub">Day-by-day solar and grid energy</div></div>
+        <div class="chart-wrap h-300"><canvas id="m-bar"></canvas></div>
+        <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
+      </div>
+      <div class="grid-2-1">
+        <div class="card card-pad">
+          <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — This Month</div><div class="chart-sub">Solar and grid trend over the month</div></div>
+          <div class="chart-wrap h-240"><canvas id="m-line"></canvas></div>
+          <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
+        </div>
+        <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Monthly Split</div><div class="chart-sub">Solar vs grid this month</div></div><div class="chart-wrap h-240"><canvas id="m-donut"></canvas></div></div>
       </div>
     </div>
 
@@ -2178,15 +2199,54 @@ function renderDailyExtras(P) {
   ).join('');
 }
 
+window._srcData = {};
+
+function fmtSrcVal(hours, unit) {
+  if (unit === 'd') {
+    const d = hours / 24;
+    if (d < 0.05) return fmtHrs(hours);       // too small to show as days
+    const dWhole = Math.floor(d);
+    const hRem   = Math.round((d - dWhole) * 24);
+    if (dWhole === 0) return hRem + 'h';
+    if (hRem   === 0) return dWhole + 'd';
+    return dWhole + 'd ' + hRem + 'h';
+  }
+  return fmtHrs(hours);
+}
+
+function getSrcUnit(prefix) {
+  return localStorage.getItem('srcUnit_' + prefix) || 'h';
+}
+
+function initSrcUnitBtns(prefix) {
+  const unit = getSrcUnit(prefix);
+  const container = document.getElementById('su-' + prefix);
+  if (!container) return;
+  container.querySelectorAll('.su-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.unit === unit)
+  );
+}
+
+function setSrcUnit(prefix, unit, btn) {
+  localStorage.setItem('srcUnit_' + prefix, unit);
+  btn.closest('.src-unit-btns').querySelectorAll('.su-btn').forEach(b =>
+    b.classList.toggle('active', b === btn)
+  );
+  const data = window._srcData[prefix];
+  if (data) renderSrcBreakdown(prefix, data.sh, data.gh, data.bh);
+}
+
 function renderSrcBreakdown(prefix, sh, gh, bh) {
   if (sh == null) return;
-  const total = sh + gh + bh || 1;
-  setText(prefix + '-hrs-solar', fmtHrs(sh));
-  setText(prefix + '-hrs-grid',  fmtHrs(gh));
-  setText(prefix + '-hrs-bat',   fmtHrs(bh));
+  window._srcData[prefix] = { sh, gh, bh };
+  const unit = getSrcUnit(prefix);
+  initSrcUnitBtns(prefix);
+  setText(prefix + '-hrs-solar', fmtSrcVal(sh, unit));
+  setText(prefix + '-hrs-grid',  fmtSrcVal(gh, unit));
+  setText(prefix + '-hrs-bat',   fmtSrcVal(bh, unit));
   const bar = document.getElementById(prefix + '-src-bar');
   if (!bar) return;
-  const segs = [{v: sh, c:'#f7971e', l:'Solar'}, {v: gh, c:'#ef4444', l:'Grid'}, {v: bh, c:'#a855f7', l:'Battery / Idle'}];
+  const segs = [{v:sh, c:'#f7971e', l:'Solar'}, {v:gh, c:'#ef4444', l:'Grid'}, {v:bh, c:'#a855f7', l:'Battery / Idle'}];
   bar.innerHTML = segs.filter(s => s.v > 0).map(s =>
     `<div style="flex:${s.v};background:${s.c}" title="${s.l}: ${fmtHrs(s.v)}"></div>`
   ).join('');

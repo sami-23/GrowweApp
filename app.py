@@ -107,7 +107,7 @@ async def fetch_day(
         api + 'v2/Charts/GetPlantPowerChart',
         headers=headers,
         json={'id': sid, 'date': date_str, 'full_script': False},
-        timeout=aiohttp.ClientTimeout(total=15),
+        timeout=aiohttp.ClientTimeout(total=30),
     )
     body = json.loads(await r.text(encoding='utf-8'))
     data = body.get('data') or {}
@@ -141,7 +141,7 @@ async def fetch_day(
 
 async def fetch_days_concurrent(
     api: str, login_data: dict, sid: str, dates: list[datetime.date],
-    max_concurrent: int = 6,
+    max_concurrent: int = 4,
 ) -> list[dict]:
     """Fetch multiple days with bounded concurrency to avoid SEMS rate-limiting."""
     headers = _token_header(login_data)
@@ -152,8 +152,9 @@ async def fetch_days_concurrent(
                 return await fetch_day(sess, api, headers, sid, d)
         results = await asyncio.gather(*[limited(d) for d in dates], return_exceptions=True)
     out = []
-    for r in results:
+    for d, r in zip(dates, results):
         if isinstance(r, Exception):
+            logging.warning('fetch_day failed for %s: [%s] %s', d, type(r).__name__, r)
             out.append({'solar_kwh': 0, 'grid_kwh': 0, 'points': []})
         else:
             out.append(r)

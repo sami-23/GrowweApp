@@ -2529,12 +2529,31 @@ if ('serviceWorker' in navigator) {
   m.max = ym;  m.value = ym;
 })();
 
+// ═══ DAILY AUTO-REFRESH ══════════════════════════════════════════════════════
+function isDailyToday() {
+  const v = document.getElementById('dp-daily').value;
+  return !v || v === new Date().toISOString().slice(0, 10);
+}
+
+function startDailyAutoRefresh() {
+  clearInterval(window._dailyTimer);
+  window._dailyTimer = setInterval(async () => {
+    if (!isDailyToday()) return;            // user browsed to a past date — skip
+    const date = document.getElementById('dp-daily').value || null;
+    await loadPeriod('daily', date);
+    // Keep live timeline in sync since it draws from the same daily data
+    const dd = window._rptData?.daily;
+    if (dd) renderLiveTimeline(dd.solar, dd.grid);
+  }, 5 * 60 * 1000);
+}
+
 // Load settings first so rated_kw is available before the first live fetch
 loadSettings().then(() => {
   loadDiagPrefs();
   applyTilePrefs();
   applyFlowSize(localStorage.getItem('flowSize') || '75');
   startLiveRefresh();
+  startDailyAutoRefresh();
   updateDatePickerVisibility('daily');
   // Preload report data in background so Reports/Savings tabs are instant
   setTimeout(preloadReports, 4000);

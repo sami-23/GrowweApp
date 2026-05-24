@@ -211,7 +211,7 @@ def index():
                 session['login_time']   = time.time()
                 return redirect(url_for('report'))
             except Exception as e:
-                error = str(e)
+                error = str(e) or 'Login failed — check your credentials and try again.'
     return render_template('index.html', error=error)
 
 

@@ -40,7 +40,7 @@ def extract_watts(s):
     m = re.match(r'(-?\d+\.?\d*)', str(s).strip())
     return float(m.group(1)) if m else 0.0
 
-LOGIN_URL = 'https://www.semsportal.com/api/v1/Common/CrossLogin'
+LOGIN_URL = 'https://hk.semsportal.com/api/v1/Common/CrossLogin'
 LOGIN_TOKEN = '{"version":"v2.1.0","client":"ios","language":"en"}'
 INTERVAL_H = 5 / 60  # 5-minute chart intervals in hours
 TOKEN_TTL  = 7000    # re-login after ~2 hours (SEMS tokens expire around 3h)

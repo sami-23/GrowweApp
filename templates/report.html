@@ -570,6 +570,25 @@
 
   <div id="live-error"></div>
 
+  <!-- Today's power source timeline -->
+  <div class="card card-pad mb16">
+    <div>
+      <div class="chart-badge b-bar">Today</div>
+      <div class="chart-title">Today's Power Source Timeline</div>
+      <div class="chart-sub" id="live-timeline-sub">Loading…</div>
+    </div>
+    <div style="position:relative;margin:10px 0 2px">
+      <div id="live-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--border)"></div>
+      <div id="live-timeline-axis" style="position:relative;height:18px;margin-top:3px"></div>
+    </div>
+    <div class="legend" style="flex-wrap:wrap;gap:8px">
+      <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar only</div>
+      <div class="leg"><div class="leg-box" style="background:#eab308"></div>Solar + Grid</div>
+      <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid only</div>
+      <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
+    </div>
+  </div>
+
   <!-- Live tiles — hideable, drag-to-reorder -->
   <div id="live-tiles-wrap" class="live-tiles-wrap mb16">
     <div class="live-tile tile-solar card" data-tile-id="solar" draggable="true"
@@ -713,7 +732,7 @@
   </div>
 
   <!-- Day/Month/Total KPIs -->
-  <div class="grid-3 mb16" id="live-kpi-row">
+  <div class="grid-3" id="live-kpi-row">
     <div class="card card-pad">
       <div class="stat-label"><span class="dot bg-solar"></span>Generated Today</div>
       <div class="stat-value c-solar" id="lv-eday">—</div>
@@ -731,24 +750,6 @@
     </div>
   </div>
 
-  <!-- Today's power source timeline -->
-  <div class="card card-pad">
-    <div>
-      <div class="chart-badge b-bar">Today</div>
-      <div class="chart-title">Today's Power Source Timeline</div>
-      <div class="chart-sub" id="live-timeline-sub">Loading…</div>
-    </div>
-    <div style="position:relative;margin:10px 0 2px">
-      <div id="live-timeline-bar" style="display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--border)"></div>
-      <div id="live-timeline-axis" style="position:relative;height:18px;margin-top:3px"></div>
-    </div>
-    <div class="legend" style="flex-wrap:wrap;gap:8px">
-      <div class="leg"><div class="leg-box" style="background:#f7971e"></div>Solar only</div>
-      <div class="leg"><div class="leg-box" style="background:#eab308"></div>Solar + Grid</div>
-      <div class="leg"><div class="leg-box" style="background:#ef4444"></div>Grid only</div>
-      <div class="leg"><div class="leg-box" style="background:#a855f7"></div>Battery / Idle</div>
-    </div>
-  </div>
 </div>
 
 <!-- ══════════════════════ REPORTS PAGE ════════════════════════════════════ -->
@@ -2466,6 +2467,10 @@ async function loadSettings() {
   try {
     const r = await fetch('/api/settings');
     const s = await r.json();
+    // Restore capacity values from localStorage if server lost them (e.g. redeployment reset)
+    const local = JSON.parse(localStorage.getItem('sgCapacity') || '{}');
+    if (!s.rated_kw    && local.rated_kw)    s.rated_kw    = local.rated_kw;
+    if (!s.inverter_kw && local.inverter_kw) s.inverter_kw = local.inverter_kw;
     window._settings = s;
     document.getElementById('set-rated-kw').value      = s.rated_kw     ?? '';
     document.getElementById('set-inverter-kw').value   = s.inverter_kw  ?? '';
@@ -2496,6 +2501,8 @@ async function saveSettings() {
     power_unit:      document.getElementById('set-power-unit').value               || 'W',
     timezone:        document.getElementById('set-tz').value.trim()                || 'Asia/Karachi',
   };
+  // Persist capacity locally so they survive server redeployments
+  localStorage.setItem('sgCapacity', JSON.stringify({ rated_kw: payload.rated_kw, inverter_kw: payload.inverter_kw }));
   await fetch('/api/settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
   window._settings = payload;
   const msg = document.getElementById('save-msg');

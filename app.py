@@ -161,6 +161,12 @@ async def fetch_days_concurrent(
     return out
 
 
+def fmt_err(e: Exception) -> str:
+    """Always return a non-empty error string, even for bare TimeoutError."""
+    msg = str(e)
+    return f'[{type(e).__name__}] {msg}' if msg else type(e).__name__
+
+
 def run_async(coro):
     """Run an async coroutine from sync Flask context."""
     loop = asyncio.new_event_loop()
@@ -348,7 +354,8 @@ def report_data():
         return jsonify(resp)
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logging.error('%s: %s', request.path, fmt_err(e), exc_info=True)
+        return jsonify({'error': fmt_err(e)}), 500
 
 
 @app.route('/api/live')
@@ -443,7 +450,8 @@ def live_data():
             'timestamp':     datetime.datetime.now().strftime('%H:%M:%S'),
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logging.error('%s: %s', request.path, fmt_err(e), exc_info=True)
+        return jsonify({'error': fmt_err(e)}), 500
 
 
 @app.route('/api/export/csv')
@@ -491,7 +499,8 @@ def export_csv():
                         headers={'Content-Disposition':
                                  f'attachment;filename=solar_{period}_{ref}.csv'})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logging.error('%s: %s', request.path, fmt_err(e), exc_info=True)
+        return jsonify({'error': fmt_err(e)}), 500
 
 
 @app.route('/api/solar-potential')
@@ -541,7 +550,8 @@ def solar_potential():
             'temperature_c': round(float(temp_c), 1) if temp_c is not None else None,
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logging.error('%s: %s', request.path, fmt_err(e), exc_info=True)
+        return jsonify({'error': fmt_err(e)}), 500
 
 
 @app.route('/api/stations')

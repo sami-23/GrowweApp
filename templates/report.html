@@ -2012,7 +2012,7 @@ async function fetchLive() {
   try {
     const resp = await fetch('/api/live');
     const d = await resp.json();
-    if (d.error) { document.getElementById('live-error').innerHTML=`<div class="error-banner">⚠ ${d.error}</div>`; return; }
+    if (!resp.ok || d.error) { document.getElementById('live-error').innerHTML=`<div class="error-banner">⚠ ${d.error || 'Live data unavailable (server error)'}</div>`; return; }
     document.getElementById('live-error').innerHTML = '';
 
     const unitLabel = (window._settings?.power_unit || 'W');

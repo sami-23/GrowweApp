@@ -946,15 +946,15 @@
     <div class="sub-panel" id="sub-monthly">
       <div class="sub-spin" id="spin-monthly"><div class="spinner"></div>Loading monthly data…</div>
       <div class="grid-3 mb12">
-        <div class="card card-pad"><div class="stat-label"><span class="dot bg-solar"></span>Solar This Month</div><div class="stat-value c-solar" id="m-solar">—</div><div class="stat-unit">kWh</div></div>
-        <div class="card card-pad"><div class="stat-label"><span class="dot bg-grid"></span>Grid This Month</div><div class="stat-value c-grid" id="m-grid">—</div><div class="stat-unit">kWh</div></div>
+        <div class="card card-pad"><div class="stat-label"><span class="dot bg-solar"></span>Solar <span class="m-month-lbl">This Month</span></div><div class="stat-value c-solar" id="m-solar">—</div><div class="stat-unit">kWh</div></div>
+        <div class="card card-pad"><div class="stat-label"><span class="dot bg-grid"></span>Grid <span class="m-month-lbl">This Month</span></div><div class="stat-value c-grid" id="m-grid">—</div><div class="stat-unit">kWh</div></div>
         <div class="card card-pad"><div class="stat-label"><span class="dot bg-green"></span>Self-Sufficiency</div><div class="stat-value c-green" id="m-ratio">—</div><div class="stat-unit">%</div></div>
       </div>
       <div class="card card-pad mb12">
         <div class="chart-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
           <div>
             <div class="chart-badge b-bar">Sources</div>
-            <div class="chart-title">Power Source Breakdown — This Month</div>
+            <div class="chart-title">Power Source Breakdown — <span class="m-month-lbl">This Month</span></div>
             <div class="chart-sub">Hours each source powered your home (battery = total hrs − solar − grid)</div>
           </div>
           <div class="src-unit-btns" id="su-m">
@@ -990,17 +990,17 @@
         </div>
       </div>
       <div class="card card-pad mb12">
-        <div class="chart-head"><div class="chart-badge b-bar">Bar</div><div class="chart-title">Daily Breakdown — This Month (kWh)</div><div class="chart-sub">Day-by-day solar and grid energy</div></div>
+        <div class="chart-head"><div class="chart-badge b-bar">Bar</div><div class="chart-title">Daily Breakdown — <span class="m-month-lbl">This Month</span> (kWh)</div><div class="chart-sub">Day-by-day solar and grid energy</div></div>
         <div class="chart-wrap h-300"><canvas id="m-bar"></canvas></div>
         <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar (kWh)</div><div class="leg"><div class="leg-box bg-grid"></div>Grid (kWh)</div></div>
       </div>
       <div class="grid-2-1">
         <div class="card card-pad">
-          <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — This Month</div><div class="chart-sub">Solar and grid trend over the month</div></div>
+          <div class="chart-head"><div class="chart-badge b-line">Line</div><div class="chart-title">Daily Trend — <span class="m-month-lbl">This Month</span></div><div class="chart-sub">Solar and grid trend over the month</div></div>
           <div class="chart-wrap h-240"><canvas id="m-line"></canvas></div>
           <div class="legend"><div class="leg"><div class="leg-box bg-solar"></div>Solar</div><div class="leg"><div class="leg-box bg-grid"></div>Grid</div></div>
         </div>
-        <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Monthly Split</div><div class="chart-sub">Solar vs grid this month</div></div><div class="chart-wrap h-240"><canvas id="m-donut"></canvas></div></div>
+        <div class="card card-pad"><div class="chart-head"><div class="chart-badge b-donut">Donut</div><div class="chart-title">Monthly Split</div><div class="chart-sub">Solar vs grid · <span class="m-month-lbl">this month</span></div></div><div class="chart-wrap h-240"><canvas id="m-donut"></canvas></div></div>
       </div>
     </div>
 
@@ -1015,7 +1015,7 @@
   <div class="period-picker mb20">
     <button class="period-btn active" data-period="daily">Today</button>
     <button class="period-btn" data-period="weekly">This Week</button>
-    <button class="period-btn" data-period="monthly">This Month</button>
+    <button class="period-btn" data-period="monthly"><span class="m-month-lbl">This Month</span></button>
   </div>
 
   <div id="sav-error"></div>
@@ -1294,7 +1294,7 @@
       Station ID: <span id="set-station-id" style="font-family:monospace;font-size:12px">—</span><br>
       API Region: Hong Kong (hk.semsportal.com)<br>
       Platform: GoodWe SEMS Portal<br>
-      App Version: v1.0
+      App Version: v1.1
     </div>
   </div>
 </div>
@@ -1413,6 +1413,19 @@ function updateDatePickerVisibility(tab) {
     const el = document.getElementById('dp-wrap-' + t);
     if (el) el.style.display = t === tab ? '' : 'none';
   });
+}
+
+function updateMonthlyLabels() {
+  const v = document.getElementById('dp-monthly')?.value;  // "YYYY-MM"
+  const curYm = new Date().toISOString().slice(0, 7);
+  let label;
+  if (!v || v === curYm) {
+    label = 'This Month';
+  } else {
+    const [y, m] = v.split('-').map(Number);
+    label = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }
+  document.querySelectorAll('.m-month-lbl').forEach(el => el.textContent = label);
 }
 
 function getDateParam() {
@@ -2211,7 +2224,11 @@ async function loadAllPeriods(date) {
   // Yearly is on-demand only (too many API calls) — loads when user clicks the Yearly tab
   await loadPeriod('daily', date);
   await loadPeriod('weekly', date);
-  await loadPeriod('monthly', date);
+  // Monthly keeps its own selected month (defaults to last month), independent
+  // of the daily/weekly reference date so Reports + Savings show last month.
+  const mv = document.getElementById('dp-monthly').value;  // "YYYY-MM"
+  updateMonthlyLabels();
+  await loadPeriod('monthly', mv ? mv + '-01' : date);
 }
 
 // Keep loadReports as alias so header Refresh button and other callers still work
@@ -2521,12 +2538,16 @@ if ('serviceWorker' in navigator) {
   const today = new Date();
   const ymd = today.toISOString().slice(0, 10);  // YYYY-MM-DD
   const ym  = today.toISOString().slice(0, 7);   // YYYY-MM
+  // Default the monthly view to last (completed) month.
+  const lm = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const lastYm = `${lm.getFullYear()}-${String(lm.getMonth() + 1).padStart(2, '0')}`;
   const d = document.getElementById('dp-daily');
   const w = document.getElementById('dp-weekly');
   const m = document.getElementById('dp-monthly');
   d.max = ymd; d.value = ymd;
   w.max = ymd; w.value = ymd;
-  m.max = ym;  m.value = ym;
+  m.max = ym;  m.value = lastYm;   // default to last month, still selectable up to this month
+  updateMonthlyLabels();
 })();
 
 // ═══ DAILY AUTO-REFRESH ══════════════════════════════════════════════════════

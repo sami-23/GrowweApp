@@ -24,11 +24,13 @@ SECTION: REPORTS
 --------------------------------------------------------------------------------
 [x] Daily report    — hourly line/bar/donut charts + stat cards with kWh units
 [x] Weekly report   — last 7 days grouped bar + line + donut
-[x] Monthly report  — daily breakdown bar + line + donut
+[x] Monthly report  — daily breakdown bar + line + donut; defaults to last
+    (completed) month for Reports + Savings; full-month range fix (v1.1)
 [~] Yearly report   — REMOVED (too many SEMS API calls; 130+ requests per load)
 [x] Multiple chart types per period (line, bar, donut)
 [x] Self-sufficiency % stat card per period
-[x] Date picker — browse any past day / month / year via toolbar date inputs
+[x] Date picker — browse any past day / month / year via toolbar date inputs;
+    monthly picker defaults to last month with dynamic month labels
 [~] Comparison mode — REMOVED (feature not needed, simplified codebase)
 [x] Progressive loading — daily shows in ~1–2s; weekly ~3–4s; monthly ~6–8s;
     each section renders independently without blocking

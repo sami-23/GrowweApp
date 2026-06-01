@@ -260,8 +260,17 @@ def report_data():
 
         import calendar
 
+        real_today = datetime.date.today()
+
         week_dates  = [today - datetime.timedelta(days=i) for i in range(6, -1, -1)]
-        month_dates = [today.replace(day=d) for d in range(1, today.day + 1)]
+        # Monthly spans the whole selected month: day 1 → end of month,
+        # capped at the real today when the selected month is the current one.
+        # (The month picker passes the 1st of the month, so we must not key off today.day.)
+        if today.year == real_today.year and today.month == real_today.month:
+            month_last = real_today.day
+        else:
+            month_last = calendar.monthrange(today.year, today.month)[1]
+        month_dates = [today.replace(day=d) for d in range(1, month_last + 1)]
         year_dates  = []
         for m in range(1, today.month + 1):
             last_day = today.day if m == today.month else calendar.monthrange(today.year, m)[1]

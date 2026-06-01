@@ -3,6 +3,36 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v1.1 — 2026-06-02  (Monthly report fix + last-month default)
+--------------------------------------------------------------------------------
+FIXED
+  - Monthly report collapsed to a single day. The month picker sends the 1st of
+    the month (YYYY-MM-01), and /api/report-data built the month's day list from
+    range(1, today.day + 1) — keyed off the reference date's day. Since that day
+    was always 01, only day 1 was ever fetched, so "monthly" looked like "daily".
+  - Fix: the monthly range now spans the full selected month (day 1 → end of
+    month via calendar.monthrange), capped at the real today for the current
+    month. Decoupled from the reference date's day component.
+
+CHANGED
+  - Monthly tab now defaults to last (completed) month instead of the current
+    month — for both Reports and Savings (they share the same d.monthly data).
+  - Monthly date picker defaults to last month (m.value), still selectable up to
+    the current month (m.max).
+  - loadAllPeriods() loads the monthly period from its own picker value,
+    independent of the daily/weekly reference date.
+  - "This Month" labels in the monthly panel and the Savings monthly button are
+    now dynamic (m-month-lbl class) — show the actual selected month name (e.g.
+    "May 2026"), or "This Month" when the current month is selected.
+  - App version bumped to v1.1 (login page + settings system info).
+
+TECHNICAL NOTES
+  - updateMonthlyLabels(): reads dp-monthly, formats month label, updates all
+    .m-month-lbl spans; called on boot and on every report load.
+  - CSV export already iterated the full month independently, so it was unaffected
+    by the original bug and stays consistent with the fixed chart range.
+
+--------------------------------------------------------------------------------
 v0.9 — 2026-05-23  (Source breakdown enhancements)
 --------------------------------------------------------------------------------
 ADDED

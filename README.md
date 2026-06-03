@@ -4,7 +4,7 @@ A Flask web app for monitoring a GoodWe solar system through the **SEMS Portal**
 API. It provides a live power-flow dashboard, daily/weekly/monthly reports,
 savings & environmental-impact estimates, and CSV/PDF export.
 
-Current version: **v1.1**
+Current version: **v1.2**
 
 ## Features
 

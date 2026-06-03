@@ -16,7 +16,8 @@ SECTION: LIVE MONITORING
     blue→amber→green for generation); updates each refresh
 [x] Inverter Load tile — percentage highlighted on top, kW value + max capacity below
 [x] Live Solar Power tile — percentage + kW value displayed; color-coded
-[x] Est. Generation Potential — percentage vs rated + temperature + sky condition
+[x] Est. Generation Potential — percentage vs rated + temperature + sky condition;
+    derives from client-side rated_kw + GHI so it survives server redeploy resets (v1.2)
 [x] Inverter max capacity — configurable in Settings; used in Inverter Load tile
 
 --------------------------------------------------------------------------------

@@ -1294,7 +1294,7 @@
       Station ID: <span id="set-station-id" style="font-family:monospace;font-size:12px">—</span><br>
       API Region: Hong Kong (hk.semsportal.com)<br>
       Platform: GoodWe SEMS Portal<br>
-      App Version: v1.1
+      App Version: v1.2
     </div>
   </div>
 </div>
@@ -1999,13 +1999,20 @@ async function fetchSolarPotential() {
       badgeEl.className   = 'sky-badge ' + (SKY_CLASS[d.sky] || '');
     }
     const irrSubEl = document.getElementById('lv-irr-sub');
-    if (d.potential_kw != null && d.rated_kw > 0) {
-      const irrPct = Math.min(Math.round(d.potential_kw / d.rated_kw * 100), 100);
+    // Prefer the client-side rated_kw (survives server redeployment resets, same
+    // source the Panel Utilisation tile uses) and derive potential from GHI so
+    // this tile doesn't depend on the server having rated_kw persisted.
+    const ratedKw     = (window._settings?.rated_kw) || d.rated_kw || 0;
+    const potentialKw = ratedKw > 0
+      ? Math.round(ratedKw * (d.ghi_wm2 || 0) / 1000 * 100) / 100
+      : (d.potential_kw ?? null);
+    if (potentialKw != null && ratedKw > 0) {
+      const irrPct = Math.min(Math.round(potentialKw / ratedKw * 100), 100);
       if (irrEl)    { irrEl.textContent = irrPct + '%'; irrEl.style.color = pctColor(irrPct, 'gen'); }
-      if (irrSubEl) irrSubEl.textContent = formatPower(d.potential_kw * 1000) + ' of ' + d.rated_kw + ' kW rated';
+      if (irrSubEl) irrSubEl.textContent = formatPower(potentialKw * 1000) + ' of ' + ratedKw + ' kW rated';
     } else {
-      if (irrEl)    { irrEl.textContent = d.potential_kw != null ? formatPower(d.potential_kw * 1000) : '—'; irrEl.style.color = ''; }
-      if (irrSubEl) irrSubEl.textContent = d.rated_kw > 0 ? '' : 'Set rated kW in Settings';
+      if (irrEl)    { irrEl.textContent = potentialKw != null ? formatPower(potentialKw * 1000) : '—'; irrEl.style.color = ''; }
+      if (irrSubEl) irrSubEl.textContent = ratedKw > 0 ? '' : 'Set rated kW in Settings';
     }
     const tempEl = document.getElementById('lv-temp');
     if (tempEl) tempEl.textContent = d.temperature_c != null ? `${d.temperature_c}°C` : '';
@@ -2486,9 +2493,19 @@ async function loadSettings() {
     const s = await r.json();
     // Restore capacity values from localStorage if server lost them (e.g. redeployment reset)
     const local = JSON.parse(localStorage.getItem('sgCapacity') || '{}');
-    if (!s.rated_kw    && local.rated_kw)    s.rated_kw    = local.rated_kw;
-    if (!s.inverter_kw && local.inverter_kw) s.inverter_kw = local.inverter_kw;
+    let restored = false;
+    if (!s.rated_kw    && local.rated_kw)    { s.rated_kw    = local.rated_kw;    restored = true; }
+    if (!s.inverter_kw && local.inverter_kw) { s.inverter_kw = local.inverter_kw; restored = true; }
     window._settings = s;
+    // Persist the restored values back to the server so server-side features
+    // (e.g. /api/solar-potential generation potential) see them too.
+    if (restored) {
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rated_kw: s.rated_kw || 0, inverter_kw: s.inverter_kw || 0 }),
+      }).catch(() => {});
+    }
     document.getElementById('set-rated-kw').value      = s.rated_kw     ?? '';
     document.getElementById('set-inverter-kw').value   = s.inverter_kw  ?? '';
     document.getElementById('set-latitude').value      = s.latitude     ?? 33.6007;

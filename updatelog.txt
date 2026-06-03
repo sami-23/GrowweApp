@@ -3,6 +3,34 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+v1.2 — 2026-06-03  (Generation Potential rated-kW fix)
+--------------------------------------------------------------------------------
+FIXED
+  - "Est. Generation Potential" live tile showed nothing and kept prompting
+    "Set rated kW in Settings" even though rated kW appeared set in the Settings
+    form. On hosts with an ephemeral filesystem (Railway), settings.json resets
+    to defaults (rated_kw 0) on every redeploy. loadSettings() repopulated the
+    Settings form and window._settings from localStorage (sgCapacity), so the UI
+    *looked* configured and the Panel Utilisation tile (which reads the client
+    value) worked — but the restore never reached the server. The Generation
+    Potential tile is the one feature that read rated_kw straight from the
+    server via /api/solar-potential (app.py), which still saw 0, so the backend
+    returned potential_kw null and the tile fell back to the prompt.
+  - Fix 1 (durable): when loadSettings() restores rated_kw/inverter_kw from
+    localStorage, it now POSTs them back to /api/settings so server-side state
+    becomes consistent again after a redeployment reset.
+  - Fix 2 (immediate): fetchSolarPotential() now derives the potential from the
+    client-side rated_kw (window._settings) and the returned GHI instead of
+    trusting the server's rated_kw. This makes the tile correct on first paint
+    (the re-save POST is async and would otherwise lose the race) and matches
+    the backend formula rated_kw * ghi / 1000.
+
+TECHNICAL NOTES
+  - Same client-side rated_kw source the Panel Utilisation tile already used, so
+    the two tiles are now consistent after a redeploy.
+  - App version bumped to v1.2 (login page + settings system info).
+
+--------------------------------------------------------------------------------
 v1.1 — 2026-06-02  (Monthly report fix + last-month default)
 --------------------------------------------------------------------------------
 FIXED

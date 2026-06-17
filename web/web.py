@@ -188,6 +188,12 @@ class Session:
     def _fetch_live(self):
         self._ensure_login()
         pf = get_powerflow(self.api, self.login, self.sid)
+        if not pf:
+            # token was likely invalidated elsewhere (SEMS hands out a session
+            # token a newer login can kill); re-auth and retry once
+            self.login = None
+            self._ensure_login()
+            pf = get_powerflow(self.api, self.login, self.sid)
         grid = self.last_grid
         etotal = None
         try:

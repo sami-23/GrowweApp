@@ -143,16 +143,20 @@ def _watts(s):
 
 
 def grid_state_from_detail(inv):
-    """Return 'on' / 'off' / None from inverter work_mode + grid voltage."""
+    """Return 'on' / 'off' / None for grid presence.
+
+    Grid AC voltage is the reliable signal: ~230V on-grid, near 0V off-grid.
+    work_mode is NOT reliable -- it reads 'Online Mode' (the inverter is
+    running) even during a grid outage, so we never treat it as a positive
+    on-grid indicator; only an explicit off/backup mode counts as off.
+    """
     d = inv.get('d') or {}
     wm = str(d.get('work_mode', '')).lower()
     if 'off' in wm or 'backup' in wm:
         return 'off'
-    if 'on' in wm or 'normal' in wm:
-        return 'on'
-    gv = _watts(d.get('grid_voltage'))
+    gv = _watts(d.get('grid_voltage')) or _watts(d.get('vac1'))
     if gv:
-        return 'on' if gv > 50 else 'off'
+        return 'on' if gv > 80 else 'off'
     return None
 
 
@@ -194,7 +198,7 @@ class Session:
         except Exception:
             pass  # keep last-known grid state; live flow still updates
         return {'pf': pf, 'grid_state': grid, 'etotal': etotal,
-                'updated': datetime.datetime.now().strftime('%H:%M:%S')}
+                'ts': time.time()}  # epoch; browser renders it in local time
 
     def _fetch_stats(self):
         today = datetime.date.today()
@@ -271,7 +275,8 @@ PAGE = r"""<!doctype html>
   .solar{ color:var(--green); } .grid{ color:var(--orange); }
   tfoot td{ border-top:1px solid #2a2a31; padding-top:9px; color:var(--grey); }
   .err{ color:var(--red); font-size:13px; padding:6px 18px; }
-  .hint{ color:#5a5a62; font-size:11px; padding:0 0 18px; }
+  .hint{ color:#5a5a62; font-size:11px; padding:0 0 6px; }
+  .credit{ color:#7a7a82; font-size:12px; letter-spacing:.3px; padding:0 0 22px; }
 </style>
 </head>
 <body>
@@ -295,6 +300,7 @@ PAGE = r"""<!doctype html>
     </table>
   </div>
   <div class="hint">auto-refreshing • figures come straight from SEMS</div>
+  <div class="credit">Built by Sami Malik</div>
 
 <script>
 const C = document.getElementById('c'), X = C.getContext('2d');
@@ -365,7 +371,8 @@ function paintHeader(){
   const pf=(DATA&&DATA.pf)||{}; const soc=Math.round(+(pf.soc)||0);
   dot.style.color=col; dot.style.background=col;
   st.textContent = txt + (DATA? '  ·  Battery '+soc+'%' : '');
-  document.getElementById('updated').textContent = (DATA&&DATA.updated)? 'updated '+DATA.updated : '';
+  document.getElementById('updated').textContent =
+    (DATA&&DATA.ts)? 'updated '+new Date(DATA.ts*1000).toLocaleTimeString() : '';
 }
 
 function paintPanel(){
